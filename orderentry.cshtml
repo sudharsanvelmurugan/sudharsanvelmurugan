@@ -1,0 +1,2510 @@
+﻿@{
+    Layout = "_Dashboard";
+
+}
+@*@{
+
+    int idFromViewBag = ViewBag.value;
+}*@
+
+@section Styles{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #popup {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .my-button-container {
+            text-align: right;
+        }
+    </style>
+}
+
+
+
+<form method="post" action="/Home/save" id="orderentryform">
+    <br />
+    <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Order Entry</h2>
+
+    <br />
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="orderno">Order No:</label>
+                    <input type="text" class="form-control" id="orderno" name="orderno" />
+                    <input type="hidden" id="hiddenId" name="orderid">
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="orderdate">Order Date</label>
+                    <input type="text" id="orderdate" name="orderdate" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="jobtype">Job Type:</label>
+                    <select name="jobtype" id="jobtype" class="form-control">
+                        <option value="Import">Import</option>
+                        <option value="Export">Export</option>
+                        <option value="Transit">Transit</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="initiator">Initiator</label>
+                    <input class="form-control" type="text" id="initiator"  autocomplete="on" />
+                    <input type="hidden" class="selected-id" name="initiator" />
+
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="importer">Importer:</label>
+                    <input class="form-control" type="text" id="importer"  />
+                    <input type="hidden" class="selected-id" name="importer" />
+
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="exporter">Exporter:</label>
+                    <input class="form-control" type="text" id="exporter"  />
+                    <input type="hidden" class="selected-id" name="exporter" />
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="referencesno">Reference No</label>
+                    <input type="text" class="form-control" id="referencesno" name="referencesno" placeholder="Generate" />
+                </div>
+
+            </div>
+            <div class="my-button-container">
+                <button type="submit" class="btn btn-primary" id="save">Save</button>
+
+                <a type="button" class="btn btn-success" id="formsubmit">Add Invoice</a>
+            </div>
+
+        </div>
+    </div>
+</form>
+<br />
+
+<form id="invoiceform">
+    <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Invoice Entry</h2>
+
+    <br />
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="invoiceno">Invoice No:</label>
+                    <input type="text" class="form-control" id="invoiceno" name="invoiceno" />
+                    <input type="hidden" id="sid" name="invoiceid" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="invoicedate">Invoice Date:</label>
+                    <input type="date" id="invoicedate" name="invoicedate" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="invoicetype">Invoice Type:</label>
+                    <select name="invoicetype" id="invoicetype" class="form-control">
+                        <option value="select">Select</option>
+                        <option value="COST">COST</option>
+                        <option value="COST&INS">COST&INS</option>
+                        <option value="COST&OTH">COST&OTH</option>
+                        <option value="COST&INS&OTH">COST&INS&OTH</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="currencycode">Currency Code:</label>
+                    <select name="currencycode" id="currencycode" class="form-control">
+                        <option value="USD">USD</option>
+                        <option value="MYR">MYR</option>
+                        <option value="INR">INR</option>
+
+                    </select>
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="exchangerate">Exchange Rate:</label>
+                    <input type="text" class="form-control" id="exchangerate" name="exchangerate" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="invoiceamount">Invoice Amount:</label>
+                    <input type="text" class="form-control" id="invoiceamount" name="invoiceamount" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="invoicelocalvalue">Invoice Local Amount:</label>
+                    <input type="text" class="form-control" id="invoicelocalvalue" name="invoicelocalvalue" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="inschargetype">INS Charge Type:</label>
+                    <select name="inschargetype" id="inschargetype" class="form-control">
+                        <option value="select">Select</option>
+                        <option value="insvalue">insvalue</option>
+                        <option value="inspercentage">inspercentage</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="insvalue">Value:</label>
+                    <input type="text" class="form-control" id="insvalue" name="insvalue" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="inslocalvalue">INS Local Value:</label>
+                    <input type="text" class="form-control" id="inslocalvalue" name="inslocalvalue" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="othchargetype">OTH Charge Type:</label>
+                    <select name="othchargetype" id="othchargetype" class="form-control">
+                        <option value="select">Select</option>
+                        <option value="othvalue">othvalue</option>
+                        <option value="othpercentage">othpercentage</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="othvalue">Value:</label>
+                    <input type="text" class="form-control" id="othvalue" name="othvalue" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="othlocalvalue">OTH Local Value:</label>
+                    <input type="text" class="form-control" id="othlocalvalue" name="othlocalvalue" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="costins">COST&INS:</label>
+                    <input type="text" class="form-control" id="costins" name="costins" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="costoth">COST&OTH:</label>
+                    <input type="text" class="form-control" id="costoth" name="costoth" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="costinsoth">COST&INS&OTH</label>
+                    <input type="text" class="form-control" id="costinsoth" name="costinsoth" />
+                </div>
+
+            </div>
+            <div class="my-button-container">
+                <button type="submit" class="btn btn-primary" id="saveinvoice">Save</button>
+
+
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div class="my-button-container">
+    <button type="button" class="btn btn-success" id="additem">AddItem</button>
+</div>
+<br />
+<div class="row">
+    <div class="col-12">
+        <div class="card" id="cardinvoice" >
+          <div class="card-body">
+              <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Invoice Table</h2>
+                <table id="dataTable" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Invoice No</th>
+                        <th>Invoice Date</th>
+                        <th>Invoice Type</th>
+                        <th>Currency Code</th>
+                        <th>Exchange Rate</th>
+                        <th>Invoice Amount</th>
+                        <th>Invoice Local Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="tablebody">
+
+                </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+</div>
+
+
+<form id="itemsectionform">
+
+    <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Item Section</h2>
+    <br />
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <input type="hidden" id="hiddenid" name="itemid">
+                    <label class="form-label" for="invoiceno">Invoice No:</label>
+                    <select class="form-control" id="invoicenoitem" name="invoiceno">
+                       
+                    </select>
+
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="itemcode">Item Code:</label>
+                    <input type="text" class="form-control" id="itemcode" name="itemcode" autocomplete="on" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="itemdescription">Desc:</label>
+                    <input type="text" class="form-control" id="itemdescription" name="itemdescription" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="quantity">Quantity</label>
+                    <input type="text" class="form-control" id="quantity" name="quantity" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="itemamount">Item Amount:</label>
+                    <input type="text" class="form-control" id="itemamount" name="itemamount" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="itemlocalvalue">Item Local Amount:</label>
+                    <input type="text" class="form-control" id="itemlocalvalue" name="itemlocalvalue" />
+                </div>
+                <div class="col-md-4 mb-1">
+                    <label class="form-label" for="unitprice">Unit Price:</label>
+                    <input type="text" class="form-control" id="unitprice" name="unitprice" />
+                </div>
+            </div>
+
+            <div class="my-button-container">
+                <button type="submit" class="btn btn-primary" id="itemsave">Save</button>
+
+
+            </div>
+        </div>
+    </div>
+</form>
+@*<div id="overlay">
+    <div class="demo-inline-spacing" id="popup">
+        <p>Enter text:</p>
+        <input type="text" id="textinvoiceno">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="popover" data-bs-placement="top" data-bs-container="body" onclick="closePopup()">
+           close
+        </button>
+       
+    </div>
+</div>*@
+
+
+ @*<div class="my-button-container">
+       <button type="button" class="btn btn-success" id="itemcancel">Cancel</button>
+ </div>*@
+<div class="row" >
+    <div class="col-12">
+        <div class="card" id="carditem" >
+          <div class="card-body">
+               <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Item Table</h2>
+                <table id="itemTable" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Invoice No</th>
+                        <th>Item code</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Item Amount</th>
+                        <th>Item Local Value</th>
+                        <th>Unit Price</th>
+                    </tr>
+                </thead>
+                <tbody id="itembody">
+                </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+</div>
+<div class="my-button-container">
+    <a type="button" class="btn btn-success" id="back" asp-action="Privacy" asp-controller="Home">Back</a>
+</div>
+
+<section id="overlay">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+
+                <div class="card-body">
+
+                    <div class="demo-inline-spacing" id="popup">
+                        <p>Enter text:</p>
+                        <input type="text" id="textinvoiceno">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="popover" data-bs-placement="top" data-bs-container="body" id="closepopup">
+                            close
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+
+
+    @*<script src="~/app-assets/js/scripts/tables/table-datatables-advanced.min.js"></script>
+    <script src="~/app-assets/js/scripts/tables/table-datatables-advanced.js"></script>
+    <script src="../../../app-assets/vendors/js/tables/datatable/jquery.dataTables.min.js"></script>
+    <script src="../../../app-assets/vendors/js/tables/datatable/dataTables.bootstrap5.min.js"></script>
+    <script src="../../../app-assets/vendors/js/tables/datatable/dataTables.responsive.min.js"></script>
+    <script src="../../../app-assets/vendors/js/tables/datatable/responsive.bootstrap5.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+            if(@ViewBag.entryid==0){
+
+                
+            $("#cardinvoice").hide();
+            $("#carditem").hide();
+            $("#invoiceform").hide();
+            $("#formsubmit").hide();
+            $("#dataTable").hide();
+
+            $("#additem").hide();
+
+            $("#itemsectionform").hide();
+
+            $("#itemTable").hide();
+
+            $("#back").hide();
+
+            $("#overlay").hide();
+
+            updateOrderNumber();
+
+            $("#save").click(function (event) {
+                event.preventDefault();
+
+                var formdata = $("#orderentryform").serialize();
+
+                $.ajax({
+                    url: "/Home/save",
+                    type: "POST",
+                    data: formdata,
+
+                    success: function (response) {
+
+                        $("#hiddenId").val(response.orderid);
+
+                        $("#formsubmit").show();
+                    }
+                })
+
+            });
+
+
+            //function submitform(){
+            //    console.log("sudharsan");
+            //    $("#formsubmit").show();
+            //}
+
+            $("#formsubmit").click(function () {
+                $("#invoiceform").show();
+
+            });
+
+
+            $('#initiator,#importer,#exporter').autocomplete({
+                minLength: 3,
+                source: function (request, response) {
+                    if (request.term.length >= 3) {
+                        $.ajax({
+                            url: "/Home/order",
+                            type: "GET",
+                            dataType: "json",
+                            data: { Prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.email, value: item.masterid };
+                                }))
+
+                            }
+                        })
+                    }
+
+                },
+
+                select: function (event, ui) {
+                    $(this).val(ui.item.label);
+                    console.log(ui.item.value);
+                    $(this).siblings('.selected-id').val(ui.item.value);
+                    event.preventDefault();
+                },
+
+            });
+
+
+
+            var lastFiveDigits = 0;
+
+
+            var today = new Date().toISOString().split('T')[0];
+            $("#orderdate").val(today);
+
+            var autoReferenceNumber = generateReferenceNumber();
+
+            $("#referencesno").val(autoReferenceNumber);
+
+            var invoiceNumbers = [];
+
+            $("#jobtype").change(function () {
+                updateOrderNumber();
+            });
+
+
+
+            function generateReferenceNumber() {
+                var numberOfHashes = 8;
+                var hashes = Array(numberOfHashes + 1).join('#');
+                var counter = Array(3 + 1).join('#');
+                var referenceNumber = hashes + "-ORD-" + counter;
+
+                return referenceNumber;
+            }
+
+            function updateOrderNumber() {
+
+                var companyId = '@ViewBag.get';
+               
+                var selectedJobField = $("#jobtype").val();
+                var checkUrl = '/Home/generateordernumber';
+
+                $.get(checkUrl, { companyId: companyId, selectedJobField: selectedJobField })
+                    .done(function (response) {
+                        var uniqueOrderNumber = response.orderNumber;
+                        $("#orderno").val(uniqueOrderNumber);
+                    })
+                    .fail(function () {
+                        alert('Error generating unique order number. Please try again.');
+                    });
+            }
+
+
+
+
+            $("#saveinvoice").click(function () {
+                Saveinvoice();
+            })
+
+            let invoicelocalvalue=0;
+            function Saveinvoice() {
+                var formData = $("#invoiceform").serialize();
+
+                $.ajax({
+                    url: "/Invoice/saveinvoice",
+                    type: "POST",
+                    data: formData,
+                })
+                    .done(function (response) {
+                        //var newRow = '<tr>' +
+                        //    '<td>' + response.invoiceno + '</td>' +
+                        //    '<td>' + response.invoicedate + '</td>' +
+                        //    '<td>' + response.invoicetype + '</td>' +
+                        //    '<td>' + response.currencycode + '</td>' +
+                        //    '<td>' + response.exchangerate + '</td>' +
+                        //    '<td>' + response.invoiceamount + '</td>' +
+                        //    '<td>' + response.invoicelocalvalue + '</td>' +
+                        //    '<td><button class="edit-btn" data-id="' + response.invoiceid + '">Edit</button></td>' +
+                        //    '<td><button class="delete-btn" data-id="' + response.invoiceid + '">Delete</button></td>' +
+                        //    '</tr>';
+
+                        //    $("#dataTable").append(newRow);
+
+                        alert("Data submitted successfully");
+                            $("#cardinvoice").show();
+                        $("#dataTable").show();
+                        $("#invoiceform :input").not(":input[type='date']").val('');
+                        invoicelocalvalue=response.invoicelocalvalue;
+                        fetchDataAndAddRow(response);
+                        $("#additem").show();
+                    })
+                    .fail(function () {
+                        alert("Data not saved");
+                    });
+
+            }
+
+            $('#invoiceform').submit(function (event) {
+                event.preventDefault();
+
+
+                var newInvoiceNumber = $('#invoiceno').val();
+
+                invoiceNumbers.push(newInvoiceNumber);
+
+            });
+
+            var today = new Date().toISOString().split('T')[0];
+            $("#invoicedate").val(today);
+
+            $('#currencycode').change(function () {
+
+                var selectedCurrency = $(this).val();
+
+
+                if (selectedCurrency === 'INR') {
+                    $('#exchangerate').val(1);
+                    insLocalValue();
+                    othLocalValue();
+                    cost();
+                } else {
+
+                    $('#exchangerate').val('');
+                    insLocalValue();
+                    othLocalValue();
+                    cost();
+                }
+                calculateInvoiceLocalValue();
+            });
+
+            $('#invoiceamount, #exchangerate').on('input', function () {
+                calculateInvoiceLocalValue();
+                othLocalValue();
+            });
+
+            $('#invoicelocalvalue').on('input', function () {
+                cost();
+                insLocalValue();
+            });
+
+            function calculateInvoiceLocalValue() {
+                var invoiceAmount = parseFloat($('#invoiceamount').val()) || 0;
+                var exchangeRate = parseFloat($('#exchangerate').val()) || 0;
+                var invoicelocalvalue = invoiceAmount * exchangeRate;
+
+
+                $('#invoicelocalvalue').val(invoicelocalvalue.toFixed(2));
+                cost();
+            }
+
+            $("#insvalue").on('input', function () {
+                insLocalValue();
+                cost();
+            });
+
+            $("#inschargetype").change(function () {
+                insLocalValue();
+                cost();
+            });
+
+            $("#exchangerate").on('input', function () {
+                insLocalValue();
+                cost();
+            });
+
+            function insLocalValue() {
+                var insValue = parseFloat($("#insvalue").val()) || 0;
+                var selectedOption = $("#inschargetype").val();
+                var inslocalamount = parseFloat($("#invoicelocalvalue").val()) || 0;
+                var exchangeRate = parseFloat($("#exchangerate").val()) || 0;
+                if (selectedOption == 'insvalue') {
+                    var insLocalValue = exchangeRate * insValue;
+                    $("#inslocalvalue").val(insLocalValue);
+                } else if (selectedOption == 'inspercentage') {
+
+                    var percentage = insValue / 100;
+                    var insLocalValue = percentage * inslocalamount;
+                    $("#inslocalvalue").val(insLocalValue);
+                }
+            }
+
+
+
+
+            $("#othvalue").on('input', function () {
+                othLocalValue();
+                cost();
+            });
+
+
+            $("#othchargetype, #invoicelocalvalue, #exchangerate").change(function () {
+                othLocalValue();
+                cost();
+            });
+
+            function othLocalValue() {
+                var othValue = parseFloat($("#othvalue").val()) || 0;
+                var selectedOption = $("#othchargetype").val();
+                var othlocalamount = parseFloat($("#invoicelocalvalue").val()) || 0;
+                var exchangeRate = parseFloat($("#exchangerate").val()) || 0;
+
+                if (selectedOption == 'othvalue') {
+                    var othLocalValue = exchangeRate * othValue;
+                    $("#othlocalvalue").val(othLocalValue);
+                } else {
+                    var othLocalValue = othValue / 100;
+                    var percentage = othLocalValue * othlocalamount;
+                    $("#othlocalvalue").val(percentage);
+                }
+            }
+
+            $("#invoicetype").change(function () {
+                cost();
+            });
+
+            function cost() {
+
+
+                var selecttype = $("#invoicetype").val();
+
+                var invoicelocalamount = parseFloat($("#invoicelocalvalue").val()) || 0;
+                var inslocalvalue = parseFloat($("#inslocalvalue").val()) || 0;
+                var othlocalvalue = parseFloat($("#othlocalvalue").val()) || 0;
+
+
+
+
+                if (selecttype == 'COST') {
+                    var cost_ins = parseFloat(invoicelocalamount) + parseFloat(inslocalvalue);
+                    var cost_oth = parseFloat(invoicelocalamount) + parseFloat(othlocalvalue);
+                    var cost_ins_oth = parseFloat(invoicelocalamount) + parseFloat(inslocalvalue) + parseFloat(othlocalvalue);
+
+                    $("#costins").val(cost_ins);
+                    $("#costoth").val(cost_oth);
+                    $("#costinsoth").val(cost_ins_oth);
+                } else if (selecttype == 'COST&INS') {
+                    var cost_ins = parseFloat(invoicelocalamount);
+                    var cost_oth = parseFloat(invoicelocalamount) + parseFloat(othlocalvalue);
+
+                    var cost_ins_oth1 = parseFloat(invoicelocalamount) - parseFloat(othlocalvalue);
+                    var cost_ins_oth = cost_ins_oth1 + parseFloat(inslocalvalue);
+
+                    $("#costins").val(cost_ins);
+                    $("#costoth").val(cost_oth);
+                    $("#costinsoth").val(cost_ins_oth);
+                } else if (selecttype == 'COST&OTH') {
+                    var cost_ins = parseFloat(invoicelocalamount);
+
+                    var cost_oth = parseFloat(invoicelocalamount) + parseFloat(inslocalvalue);
+                    var cost_ins_oth1 = parseFloat(invoicelocalamount) - parseFloat(inslocalvalue);
+                    var cost_ins_oth = parseFloat(cost_ins_oth1) + parseFloat(othlocalvalue);
+
+
+                    $("#costins").val(cost_ins);
+                    $("#costoth").val(cost_oth);
+                    $("#costinsoth").val(cost_ins_oth);
+                } else {
+                    var cost_ins = parseFloat(invoicelocalamount) - parseFloat(othlocalvalue);
+                    var cost_oth = parseFloat(invoicelocalamount) - parseFloat(inslocalvalue);
+                    var cost_ins_oth = parseFloat(invoicelocalamount);
+
+                    $("#costins").val(cost_ins);
+                    $("#costoth").val(cost_oth);
+                    $("#costinsoth").val(cost_ins_oth);
+                }
+
+
+            }
+
+
+
+
+            $("#dataTable").on('click', '.edit-btn', function () {
+                var invoiceId = $(this).data('id');
+
+
+
+
+                $.ajax({
+                    url: "/Invoice/update",
+                    type: 'GET',
+                    data: { invoiceid: invoiceId },
+                    success: function (response) {
+
+                        editform(response);
+                        $("#dataTable tbody").empty();
+
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            });
+
+
+
+            $("#cancel").click(function () {
+
+                Saveinvoice();
+            });
+
+
+
+            function editform(data) {
+
+
+                $.each(data, function (property, value) {
+
+                    $('#invoiceform [name="' + property + '"]').val(value);
+                });
+
+
+
+
+            }
+
+
+            
+
+            $("#dataTable").on('click', '.delete-btn', function () {
+
+                //var deleteButton = $(this);
+
+                //var invoiceId = deleteButton.data('invoiceid');
+
+                var invoiceId = $(this).data('id');
+
+
+                $.ajax({
+                    url: '/Invoice/delete',
+                    type: 'GET',
+                    data: { invoiceid: invoiceId },
+                    success: function (response) {
+
+
+                        alert("Deleted successfully");
+
+                        //this.closest('tr').remove();
+
+                        //$("#dataTable").empty();
+
+                        fetchDataFromDelete(response);
+
+                    },
+                    error: function (error) {
+                        console.error('Error deleting invoice data:', error);
+                    }
+                });
+            });
+
+
+            function fetchDataAndAddRow(data) {
+
+                $.ajax({
+                    url: '/Invoice/getdata',
+                    type: 'GET',
+                    data: data,
+                    success: function (responseArray) {
+
+                        $("#dataTable tbody").empty();
+                        responseArray.forEach(function (response) {
+                            var newRow = '<tr>' +
+                                '<td><a class="edit-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                '<a class="delete-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-trash"></i></a>&nbsp'+
+                                '<a class="copy-btn" data-id="' + response.invoiceid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                '<td>' + response.invoiceno + '</td>' +
+                                '<td>' + response.invoicedate + '</td>' +
+                                '<td>' + response.invoicetype + '</td>' +
+                                '<td>' + response.currencycode + '</td>' +
+                                '<td>' + response.exchangerate + '</td>' +
+                                '<td>' + response.invoiceamount + '</td>' +
+                                '<td>' + response.invoicelocalvalue + '</td>' +
+                                 
+                                '</tr>';
+                            $("#dataTable").append(newRow);
+                            $('#dataTable').DataTable();
+                        });
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            }
+
+
+
+            function fetchDataFromDelete(orderid) {
+
+                var data = orderid;
+                console.log(data);
+
+                $.ajax({
+                    url: '/Invoice/getdatadelete',
+                    type: 'GET',
+                    data: { orderid: data },
+                    success: function (responseArray) {
+                        console.log(responseArray);
+                        $("#dataTable tbody").empty();
+                        responseArray.forEach(function (response) {
+                            var newRow = '<tr>' +
+                                '<td><a class="edit-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                '<a class="delete-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                '<a class="copy-btn" data-id="' + response.invoiceid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                '<td>' + response.invoiceno + '</td>' +
+                                '<td>' + response.invoicedate + '</td>' +
+                                '<td>' + response.invoicetype + '</td>' +
+                                '<td>' + response.currencycode + '</td>' +
+                                '<td>' + response.exchangerate + '</td>' +
+                                '<td>' + response.invoiceamount + '</td>' +
+                                '<td>' + response.invoicelocalvalue + '</td>' +
+                                
+                                '</tr>';
+                            $("#dataTable").append(newRow);
+                            $('#dataTable').DataTable();
+                        });
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            }
+                $("#dataTable").on('click', '.copy-btn', function () {
+                    var invoiceId = $(this).data('id');
+                    $("#overlay").show();
+
+                    $("#closepopup").off('click').on('click', function () {
+                        var invoiceno = $("#textinvoiceno").val();
+                        console.log(invoiceno);
+                        $("#overlay").hide();
+                        $.ajax({
+                            url: "/Mainpage/invoicecopy",
+                            type: 'GET',
+                            data: { invoiceid: invoiceId, invoiceno: invoiceno },
+                            success: function (response) {
+                                alert(response);
+                                invoicecopy(invoiceId);
+                                itemcopy(invoiceId);
+                            },
+                            error: function (error) {
+                                console.error('Error fetching invoice data:', error);
+                            }
+                        });
+                    });
+                });
+
+                function invoicecopy(invoiceId) {
+                    $.ajax({
+                        url: "/Mainpage/invoicecopydata",
+                        type: 'GET',
+                        data: { invoiceid: invoiceId },
+                        success: function (responseArray) {
+                            $("#dataTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.invoiceid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.invoicedate + '</td>' +
+                                    '<td>' + response.invoicetype + '</td>' +
+                                    '<td>' + response.currencycode + '</td>' +
+                                    '<td>' + response.exchangerate + '</td>' +
+                                    '<td>' + response.invoiceamount + '</td>' +
+                                    '<td>' + response.invoicelocalvalue + '</td>' +
+                                    '</tr>';
+                                $("#dataTable tbody").append(newRow);
+                            });
+
+                            $('#dataTable').DataTable();
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+                function itemcopy(invoiceId) {
+                    $.ajax({
+                        url: "/Mainpage/itemcopydata",
+                        type: 'GET',
+                        data: { invoiceid: invoiceId },
+                        success: function (responseArray) {
+                            $("#itemTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.itemcode + '</td>' +
+                                    '<td>' + response.itemdescription + '</td>' +
+                                    '<td>' + response.quantity + '</td>' +
+                                    '<td>' + response.itemamount + '</td>' +
+                                    '<td>' + response.itemlocalvalue + '</td>' +
+                                    '<td>' + response.unitprice + '</td>' +
+                                    '</tr>';
+                                $("#itemTable tbody").append(newRow);
+                            });
+
+                            $('#itemTable').DataTable();
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+           
+            
+
+               
+
+            $("#additem").click(function () {
+                $("#itemsectionform").show();
+                $("#invoiceform").hide();
+            })
+
+            //$('#invoicenoitem').on('change', function () {
+            //    var selectedInvoiceNo = $(this).val();
+
+            //    fetchDataDropdown(selectedInvoiceNo);
+            //});
+
+            $(document).on('click', '#invoicenoitem', function () {
+                fetchDataDropdown();
+            });
+
+            function fetchDataDropdown() {
+                $.ajax({
+                    url: '/Invoice/getdropdown',
+                    type: 'GET',
+                    success: function (data) {
+                        console.log(data);
+                        var dropdown = $('#invoicenoitem');
+                        dropdown.empty();
+                        $.each(data, function (index, item) {
+                            dropdown.append($('<option>', {
+                                label: item.invoiceno,
+                                value: item.invoiceno
+
+
+                            }));
+                        });
+                        autocomplete();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching data:', status, error);
+                    }
+                });
+            }
+
+            function autocomplete() {
+
+
+
+                $('#itemcode').autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: "/Invoice/iteminvoiceno",
+                            type: "GET",
+                            dataType: "json",
+                            data: { Prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.itemcode, value: item.itemcode, companyiditem: item.companyiditem };
+                                }));
+
+                            }
+                        })
+
+                    },
+
+                    select: function (event, ui) {
+                        $(this).val(ui.item.label);
+
+                        var selectedcompanyiditem = ui.item.companyiditem;
+                        $.ajax({
+                            url: "/Invoice/getdbdata",
+                            type: "GET",
+                            dataType: "json",
+                            data: { companyiditem: selectedcompanyiditem, itemcode: ui.item.label },
+                            success: function (data) {
+                                if (data.length > 0) {
+                                    var firstItem = data[0];
+
+                                    $('#itemdescription').val(firstItem.itemdescription);
+                                    $('#quantity').val(firstItem.quantity);
+                                    
+
+
+
+                                }
+                            },
+                            error: function (error) {
+                                console.error("Additional data AJAX error:", error);
+                            }
+                        });
+
+                        event.preventDefault();
+                    },
+                });
+            }
+
+
+
+            $("#itemamount").on('change', function () {
+                    $("#itemlocalvalue").val('');
+                    $("#unitprice").val('');
+
+                validateItemAmount($(this).val());
+            });
+
+
+
+            let totalAmount = 0;
+
+            function validateItemAmount(itemAmount) {
+                const amount = parseFloat(itemAmount);
+               
+                if(amount<=invoicelocalvalue){
+                        if (!isNaN(amount) && amount <= invoicelocalvalue) {
+                            const remainingAmount = invoicelocalvalue - totalAmount;
+
+                            if (amount <= remainingAmount) {
+                                $('#validationMessage').text('');
+
+                                itemlocalamountcalculation();
+                                totalAmount += amount;
+                                console.log(totalAmount);
+                            } else {
+                                alert(`Please enter a value less than or equal to ${remainingAmount}.`);
+                            }
+                        } else {
+                            alert('Please enter a valid numeric value less than or equal to invoicevalue');
+                        }
+                }else{
+                    alert("Not valid amount");
+                }
+                
+            }
+
+
+
+
+
+
+            function itemlocalamountcalculation() {
+                var invoiceno = $("#invoicenoitem").val();
+
+
+                $.ajax({
+                    url: '/Invoice/invoiceno',
+                    type: 'GET',
+                    data: { invoiceno: invoiceno },
+                    success: function (response) {
+
+                        var itemamount = $("#itemamount").val();
+                        var item = itemamount / 10;
+                        var value = response;
+                        console.log(value);
+
+                        var itemvalue = value / 100;
+                        var localamount = itemvalue * item;
+                        $("#itemlocalvalue").val(localamount);
+
+                        quantityamount();
+
+                    },
+                    error: function (error) {
+                        console.error('Error deleting invoice data:', error);
+                    }
+                });
+
+
+            }
+
+            function quantityamount() {
+                console.log("sudharsan");
+                var quantity = $("#quantity").val();
+                var itemlocalvalue = $("#itemlocalvalue").val();
+                var unitprice = itemlocalvalue / quantity;
+
+                $("#unitprice").val(unitprice);
+
+            }
+
+            $("#itemsave").click(function (event) {
+                    event.preventDefault();
+                    if (formIsValid()) {
+                        saveitem();
+                    }
+               
+            });
+
+                function formIsValid() {
+                    $(".error-message").remove();
+                    var itemlocalvalue = $("#itemlocalvalue").val();
+                    var unitprice = $("#unitprice").val();
+
+                    if (itemlocalvalue == "") {
+                        displayerror("itemlocalvalue","please enter itemlocalvalue");
+                        return false;
+                    }
+                    if (unitprice == "") {
+                        displayerror("unitprice","please enter unitprice");
+                        return false;
+                    }
+
+                   
+                    return true;
+                }
+
+
+                function displayerror(id, message) {
+                    $("#" + id + "-error").remove();
+                    var errormessage = '<div class="error-message">' + message + '</div>';
+                    $("#" + id).after(errormessage);
+
+                }
+
+            function saveitem() {
+                var dataform = $("#itemsectionform").serialize();
+
+                $.ajax({
+                    url: "/Invoice/itemsave",
+                    type: "POST",
+                    data: dataform,
+                })
+                    .done(function (response) {
+                        console.log("sudharsan");
+                        $("#carditem").show();
+                        $("#itemTable").show();
+                        $("#itemsectionform :input").val('');
+                        fetchDataItem(response);
+                        autocomplete();
+                        $("#itemsectionform").hide();
+                    })
+                    .fail(function (error) {
+                        alert("Data item not saved");
+                    });
+            }
+
+                $("#itemTable").on('click','.copy-btn',function(){
+                    var itemId=$(this).data('id');
+                    $.ajax({
+                        url: "/Mainpage/orderitemcopy",
+                        type: 'GET',
+                        data: { itemid: itemId },
+                        success: function (response) {
+
+                            alert(response);
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                    $.ajax({
+                        url: "/Mainpage/itemcopy",
+                        type: 'GET',
+                        data: { itemid: itemId },
+                        success: function (responseArray) {
+
+                            $("#itemTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.itemcode + '</td>' +
+                                    '<td>' + response.itemdescription + '</td>' +
+                                    '<td>' + response.quantity + '</td>' +
+                                    '<td>' + response.itemamount + '</td>' +
+                                    '<td>' + response.itemlocalvalue + '</td>' +
+                                    '<td>' + response.unitprice + '</td>' +
+
+                                    '</tr>';
+                                $("#itemTable").append(newRow);
+                                $('#itemTable').DataTable();
+                            });
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                })
+
+
+
+            function fetchDataItem(data) {
+
+                $.ajax({
+                    url: '/Invoice/getdataitem',
+                    type: 'GET',
+                    data: data,
+                    success: function (responseArray) {
+
+                        $("#itemTable tbody").empty();
+                        responseArray.forEach(function (response) {
+                            var newRow = '<tr>' +
+                                '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                '<td>' + response.invoiceno + '</td>' +
+                                '<td>' + response.itemcode + '</td>' +
+                                '<td>' + response.itemdescription + '</td>' +
+                                '<td>' + response.quantity + '</td>' +
+                                '<td>' + response.itemamount + '</td>' +
+                                '<td>' + response.itemlocalvalue + '</td>' +
+                                '<td>' + response.unitprice + '</td>' +
+                                    
+                                '</tr>';
+                            $("#itemTable").append(newRow);
+                            $('#itemTable').DataTable();
+                        });
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            }
+
+            $("#itemTable").on('click', '.edit-btn', function () {
+                var itemId = $(this).data('id');
+                $("#itemsectionform").show();
+
+
+
+                $.ajax({
+                    url: "/Invoice/updateitem",
+                    type: 'GET',
+                    data: { itemid: itemId },
+                    success: function (response) {
+
+                        editformitem(response);
+                        $("#itemTable tbody").empty();
+
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            });
+
+
+
+            function editformitem(data) {
+
+
+                $.each(data, function (property, value) {
+
+                    $('#itemsectionform [name="' + property + '"]').val(value);
+                });
+
+            }
+
+            $("#itemTable").on('click', '.delete-btn', function () {
+
+                var itemId = $(this).data('id');
+
+
+                $.ajax({
+                    url: '/Invoice/deleteitem',
+                    type: 'GET',
+                    data: { itemid: itemId },
+                    success: function (response) {
+
+                        alert("Deleted successfully");
+                        fetchDataItemDelete(response);
+
+                    },
+                    error: function (error) {
+                        console.error('Error deleting item data:', error);
+                    }
+                });
+            });
+
+            function fetchDataItemDelete(orderid) {
+
+                var data = orderid;
+                console.log(data);
+
+                $.ajax({
+                    url: '/Invoice/getitemdelete',
+                    type: 'GET',
+                    data: { orderid: data },
+                    success: function (responseArray) {
+                        console.log(responseArray);
+                        $("#itemTable tbody").empty();
+                        responseArray.forEach(function (response) {
+                            var newRow = '<tr>' +
+                                '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                '<td>' + response.invoiceno + '</td>' +
+                                '<td>' + response.itemcode + '</td>' +
+                                '<td>' + response.itemdescription + '</td>' +
+                                '<td>' + response.quantity + '</td>' +
+                                '<td>' + response.itemamount + '</td>' +
+                                '<td>' + response.itemlocalvalue + '</td>' +
+                                '<td>' + response.unitprice + '</td>' +
+                                   
+                                '</tr>';
+                            $("#itemTable").append(newRow);
+                            $('#itemTable').DataTable();
+                        });
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            }
+
+          }
+          else{
+               
+             
+                    var orderId ='@ViewBag.entryid';
+
+                $.ajax({
+                    url: "/Mainpage/orderdata",
+                    type: 'GET',
+                    data: { orderid: orderId },
+                    success: function (response) {
+                        console.log(response);
+                        $("#initiator").val(response[0]);
+                         $("#importer").val(response[1]);
+                        $("#exporter").val(response[2]);
+
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+
+                    $.ajax({
+                        url: "/Mainpage/editorderdata",
+                        type: 'GET',
+                        data: { orderid: orderId },
+                        success: function (response) {
+
+                            editformorder(response);
+                            $("#orderentryform").show();
+                            $.ajax({
+                                url: "/Mainpage/editdata",
+                                type: 'GET',
+                                data: { orderid: orderId },
+                                success: function (response) {
+
+                                    fetchDataAndAddRow(response);
+                                    $("#cardinvoice").show();
+                                    $("#dataTable").show();
+
+
+                                    $.ajax({
+                                        url: "/Mainpage/edititemdata",
+                                        type: 'GET',
+                                        data: { orderid: orderId },
+                                        success: function (response) {
+
+                                            fetchDataItem(response);
+                                            $("#carditem").show();
+                                            $("#itemTable").show();
+
+                                        },
+                                        error: function (error) {
+                                            console.error('Error fetching invoice data:', error);
+                                        }
+                                    });
+
+                                },
+                                error: function (error) {
+                                    console.error('Error fetching invoice data:', error);
+                                }
+                            });
+
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+
+
+               
+
+                function editformorder(data) {
+
+
+                    $.each(data, function (property, value) {
+
+                        $('#orderentryform [name="' + property + '"]').val(value);
+                    });
+
+                }
+                //$("#mainTable").on('click', '.delete-btn', function () {
+                //    var orderId = $(this).data('id');
+                //    $.ajax({
+                //        url: "/Mainpage/delete",
+                //        type: 'GET',
+                //        data: { orderid: orderId },
+                //        success: function (response) {
+                //            getdata(startDate, today);
+                //        },
+                //        error: function (error) {
+                //            console.error('Error fetching invoice data:', error);
+                //        }
+                //    });
+                //})
+
+
+                $("#invoiceform").hide();
+               
+                $("#dataTable").hide();
+
+                $("#itemsectionform").hide();
+
+                $("#itemTable").hide();
+
+                $("#overlay").hide();
+
+
+
+                $("#save").click(function (event) {
+                    event.preventDefault();
+
+                    var formdata = $("#orderentryform").serialize();
+
+                    $.ajax({
+                        url: "/Home/save",
+                        type: "POST",
+                        data: formdata,
+
+                        success: function (response) {
+
+                            $("#hiddenId").val(response.orderid);
+
+                            $("#formsubmit").show();
+                        }
+                    })
+
+                });
+
+
+                //function submitform(){
+                //    console.log("sudharsan");
+                //    $("#formsubmit").show();
+                //}
+
+                $("#formsubmit").click(function () {
+                    $("#invoiceform").show();
+
+                });
+
+                $("#additem").click(function () {
+                    $("#invoiceform").hide();
+                });
+
+
+                $('#initiator,#importer,#exporter').autocomplete({
+                    minLength: 3,
+                    source: function (request, response) {
+                        if (request.term.length >= 3) {
+                            $.ajax({
+                                url: "/Home/order",
+                                type: "GET",
+                                dataType: "json",
+                                data: { Prefix: request.term },
+                                success: function (data) {
+                                    response($.map(data, function (item) {
+                                        return { label: item.email, value: item.email };
+                                    }))
+
+                                }
+                            })
+                        }
+
+                    },
+
+                    select: function (event, ui) {
+                        $(this).val(ui.item.value);
+                        $(this).siblings('.selected-id').val(ui.item.value);
+                        event.preventDefault();
+                    },
+
+                });
+
+               
+
+
+
+                var lastFiveDigits = 0;
+
+
+                var today = new Date().toISOString().split('T')[0];
+                $("#orderdate").val(today);
+
+                var autoReferenceNumber = generateReferenceNumber();
+
+                $("#referencesno").val(autoReferenceNumber);
+
+                var invoiceNumbers = [];
+
+                $("#jobtype").change(function () {
+                    updateOrderNumber();
+                });
+
+
+
+                function generateReferenceNumber() {
+                    var numberOfHashes = 8;
+                    var hashes = Array(numberOfHashes + 1).join('#');
+                    var counter = Array(3 + 1).join('#');
+                    var referenceNumber = hashes + "-ORD-" + counter;
+
+                    return referenceNumber;
+                }
+
+                function updateOrderNumber() {
+                    $.ajax({
+                        url: "/Home/orderentry",
+                        type: 'GET',
+                        success: function (response) {
+                            var companyId = response;
+                            var selectedJobField = $("#jobtype").val();
+                            var checkUrl = '/Home/generateordernumber';
+
+                            $.get(checkUrl, { companyId: companyId, selectedJobField: selectedJobField })
+                                .done(function (response) {
+                                    var uniqueOrderNumber = response.orderNumber;
+                                    $("#orderno").val(uniqueOrderNumber);
+                                })
+                                .fail(function () {
+                                    alert('Error generating unique order number. Please try again.');
+                                });
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+
+
+
+                $("#saveinvoice").click(function () {
+                    Saveinvoice();
+                })
+
+                let invoicelocalvalue=0;
+                function Saveinvoice() {
+                    var formData = $("#invoiceform").serialize();
+
+                    $.ajax({
+                        url: "/Invoice/saveinvoice",
+                        type: "POST",
+                        data: formData,
+                    })
+                        .done(function (response) {
+                            //var newRow = '<tr>' +
+                            //    '<td>' + response.invoiceno + '</td>' +
+                            //    '<td>' + response.invoicedate + '</td>' +
+                            //    '<td>' + response.invoicetype + '</td>' +
+                            //    '<td>' + response.currencycode + '</td>' +
+                            //    '<td>' + response.exchangerate + '</td>' +
+                            //    '<td>' + response.invoiceamount + '</td>' +
+                            //    '<td>' + response.invoicelocalvalue + '</td>' +
+                            //    '<td><button class="edit-btn" data-id="' + response.invoiceid + '">Edit</button></td>' +
+                            //    '<td><button class="delete-btn" data-id="' + response.invoiceid + '">Delete</button></td>' +
+                            //    '</tr>';
+
+                            //    $("#dataTable").append(newRow);
+
+                            alert("Data submitted successfully");
+                            $("#cardinvoice").show();
+                            $("#dataTable").show();
+                            $("#invoiceform :input").not(":input[type='date']").val('');
+                            invoicelocalvalue=response.invoicelocalvalue;
+                            fetchDataAndAddRow(response);
+                            $("#additem").show();
+                        })
+                        .fail(function () {
+                            alert("Data not saved");
+                        });
+
+                }
+
+                $('#invoiceform').submit(function (event) {
+                    event.preventDefault();
+
+
+                    var newInvoiceNumber = $('#invoiceno').val();
+
+                    invoiceNumbers.push(newInvoiceNumber);
+
+                });
+
+                var today = new Date().toISOString().split('T')[0];
+                $("#invoicedate").val(today);
+
+                $('#currencycode').change(function () {
+
+                    var selectedCurrency = $(this).val();
+
+
+                    if (selectedCurrency === 'INR') {
+                        $('#exchangerate').val(1);
+                        insLocalValue();
+                        othLocalValue();
+                        cost();
+                    } else {
+
+                        $('#exchangerate').val('');
+                        insLocalValue();
+                        othLocalValue();
+                        cost();
+                    }
+                    calculateInvoiceLocalValue();
+                });
+
+                $('#invoiceamount, #exchangerate').on('input', function () {
+                    calculateInvoiceLocalValue();
+                    othLocalValue();
+                });
+
+                $('#invoicelocalvalue').on('input', function () {
+                    cost();
+                    insLocalValue();
+                });
+
+                function calculateInvoiceLocalValue() {
+                    var invoiceAmount = parseFloat($('#invoiceamount').val()) || 0;
+                    var exchangeRate = parseFloat($('#exchangerate').val()) || 0;
+                    var invoicelocalvalue = invoiceAmount * exchangeRate;
+
+
+                    $('#invoicelocalvalue').val(invoicelocalvalue.toFixed(2));
+                    cost();
+                }
+
+                $("#insvalue").on('input', function () {
+                    insLocalValue();
+                    cost();
+                });
+
+                $("#inschargetype").change(function () {
+                    insLocalValue();
+                    cost();
+                });
+
+                $("#exchangerate").on('input', function () {
+                    insLocalValue();
+                    cost();
+                });
+
+                function insLocalValue() {
+                    var insValue = parseFloat($("#insvalue").val()) || 0;
+                    var selectedOption = $("#inschargetype").val();
+                    var inslocalamount = parseFloat($("#invoicelocalvalue").val()) || 0;
+                    var exchangeRate = parseFloat($("#exchangerate").val()) || 0;
+                    if (selectedOption == 'insvalue') {
+                        var insLocalValue = exchangeRate * insValue;
+                        $("#inslocalvalue").val(insLocalValue);
+                    } else if (selectedOption == 'inspercentage') {
+
+                        var percentage = insValue / 100;
+                        var insLocalValue = percentage * inslocalamount;
+                        $("#inslocalvalue").val(insLocalValue);
+                    }
+                }
+
+
+
+
+                $("#othvalue").on('input', function () {
+                    othLocalValue();
+                    cost();
+                });
+
+
+                $("#othchargetype, #invoicelocalvalue, #exchangerate").change(function () {
+                    othLocalValue();
+                    cost();
+                });
+
+                function othLocalValue() {
+                    var othValue = parseFloat($("#othvalue").val()) || 0;
+                    var selectedOption = $("#othchargetype").val();
+                    var othlocalamount = parseFloat($("#invoicelocalvalue").val()) || 0;
+                    var exchangeRate = parseFloat($("#exchangerate").val()) || 0;
+
+                    if (selectedOption == 'othvalue') {
+                        var othLocalValue = exchangeRate * othValue;
+                        $("#othlocalvalue").val(othLocalValue);
+                    } else {
+                        var othLocalValue = othValue / 100;
+                        var percentage = othLocalValue * othlocalamount;
+                        $("#othlocalvalue").val(percentage);
+                    }
+                }
+
+                $("#invoicetype").change(function () {
+                    cost();
+                });
+
+                function cost() {
+
+
+                    var selecttype = $("#invoicetype").val();
+
+                    var invoicelocalamount = parseFloat($("#invoicelocalvalue").val()) || 0;
+                    var inslocalvalue = parseFloat($("#inslocalvalue").val()) || 0;
+                    var othlocalvalue = parseFloat($("#othlocalvalue").val()) || 0;
+
+
+
+
+                    if (selecttype == 'COST') {
+                        var cost_ins = parseFloat(invoicelocalamount) + parseFloat(inslocalvalue);
+                        var cost_oth = parseFloat(invoicelocalamount) + parseFloat(othlocalvalue);
+                        var cost_ins_oth = parseFloat(invoicelocalamount) + parseFloat(inslocalvalue) + parseFloat(othlocalvalue);
+
+                        $("#costins").val(cost_ins);
+                        $("#costoth").val(cost_oth);
+                        $("#costinsoth").val(cost_ins_oth);
+                    } else if (selecttype == 'COST&INS') {
+                        var cost_ins = parseFloat(invoicelocalamount);
+                        var cost_oth = parseFloat(invoicelocalamount) + parseFloat(othlocalvalue);
+
+                        var cost_ins_oth1 = parseFloat(invoicelocalamount) - parseFloat(othlocalvalue);
+                        var cost_ins_oth = cost_ins_oth1 + parseFloat(inslocalvalue);
+
+                        $("#costins").val(cost_ins);
+                        $("#costoth").val(cost_oth);
+                        $("#costinsoth").val(cost_ins_oth);
+                    } else if (selecttype == 'COST&OTH') {
+                        var cost_ins = parseFloat(invoicelocalamount);
+
+                        var cost_oth = parseFloat(invoicelocalamount) + parseFloat(inslocalvalue);
+                        var cost_ins_oth1 = parseFloat(invoicelocalamount) - parseFloat(inslocalvalue);
+                        var cost_ins_oth = parseFloat(cost_ins_oth1) + parseFloat(othlocalvalue);
+
+
+                        $("#costins").val(cost_ins);
+                        $("#costoth").val(cost_oth);
+                        $("#costinsoth").val(cost_ins_oth);
+                    } else {
+                        var cost_ins = parseFloat(invoicelocalamount) - parseFloat(othlocalvalue);
+                        var cost_oth = parseFloat(invoicelocalamount) - parseFloat(inslocalvalue);
+                        var cost_ins_oth = parseFloat(invoicelocalamount);
+
+                        $("#costins").val(cost_ins);
+                        $("#costoth").val(cost_oth);
+                        $("#costinsoth").val(cost_ins_oth);
+                    }
+
+
+                }
+
+
+
+
+                $("#dataTable").on('click', '.edit-btn', function () {
+                    var invoiceId = $(this).data('id');
+
+
+
+
+                    $.ajax({
+                        url: "/Invoice/update",
+                        type: 'GET',
+                        data: { invoiceid: invoiceId },
+                        success: function (response) {
+                            $("#invoiceform").show();
+                            editform(response);
+                            $("#dataTable tbody").empty();
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                });
+
+
+
+                $("#cancel").click(function () {
+
+                    Saveinvoice();
+                });
+
+
+
+                function editform(data) {
+
+
+                    $.each(data, function (property, value) {
+
+                        $('#invoiceform [name="' + property + '"]').val(value);
+                    });
+
+
+
+
+                }
+
+
+
+
+                $("#dataTable").on('click', '.delete-btn', function () {
+
+                    //var deleteButton = $(this);
+
+                    //var invoiceId = deleteButton.data('invoiceid');
+
+                    var invoiceId = $(this).data('id');
+
+
+                    $.ajax({
+                        url: '/Invoice/delete',
+                        type: 'GET',
+                        data: { invoiceid: invoiceId },
+                        success: function (response) {
+
+
+                            alert("Deleted successfully");
+
+                            //this.closest('tr').remove();
+
+                            //$("#dataTable").empty();
+
+                            fetchDataFromDelete(response);
+
+                        },
+                        error: function (error) {
+                            console.error('Error deleting invoice data:', error);
+                        }
+                    });
+                });
+
+
+                function fetchDataAndAddRow(data) {
+
+                    $.ajax({
+                        url: '/Invoice/getdata',
+                        type: 'GET',
+                        data: data,
+                        success: function (responseArray) {
+
+                            $("#dataTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.invoiceid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.invoicedate + '</td>' +
+                                    '<td>' + response.invoicetype + '</td>' +
+                                    '<td>' + response.currencycode + '</td>' +
+                                    '<td>' + response.exchangerate + '</td>' +
+                                    '<td>' + response.invoiceamount + '</td>' +
+                                    '<td>' + response.invoicelocalvalue + '</td>' +
+                                    
+                                    '</tr>';
+                                $("#dataTable").append(newRow);
+                                $('#dataTable').DataTable();
+                            });
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+
+
+                function fetchDataFromDelete(orderid) {
+
+                    var data = orderid;
+                    console.log(data);
+
+                    $.ajax({
+                        url: '/Invoice/getdatadelete',
+                        type: 'GET',
+                        data: { orderid: data },
+                        success: function (responseArray) {
+                            console.log(responseArray);
+                            $("#dataTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.invoiceid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.invoicedate + '</td>' +
+                                    '<td>' + response.invoicetype + '</td>' +
+                                    '<td>' + response.currencycode + '</td>' +
+                                    '<td>' + response.exchangerate + '</td>' +
+                                    '<td>' + response.invoiceamount + '</td>' +
+                                    '<td>' + response.invoicelocalvalue + '</td>' +
+                                    
+                                    '</tr>';
+                                $("#dataTable").append(newRow);
+                                $('#dataTable').DataTable();
+                            });
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+                $("#dataTable").on('click', '.copy-btn', function () {
+                    var invoiceId = $(this).data('id');
+                    $("#overlay").show();
+
+                    $("#closepopup").off('click').on('click', function () {
+                        var invoiceno = $("#textinvoiceno").val();
+                        console.log(invoiceno);
+                        $("#overlay").hide();
+                        $.ajax({
+                            url: "/Mainpage/invoicecopy",
+                            type: 'GET',
+                            data: { invoiceid: invoiceId, invoiceno: invoiceno },
+                            success: function (response) {
+                                alert(response);
+                                invoicecopy(invoiceId);
+                                itemcopy(invoiceId);
+                            },
+                            error: function (error) {
+                                console.error('Error fetching invoice data:', error);
+                            }
+                        });
+                    });
+                });
+
+                function invoicecopy(invoiceId) {
+                    $.ajax({
+                        url: "/Mainpage/invoicecopydata",
+                        type: 'GET',
+                        data: { invoiceid: invoiceId },
+                        success: function (responseArray) {
+                            $("#dataTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.invoiceid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.invoiceid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.invoicedate + '</td>' +
+                                    '<td>' + response.invoicetype + '</td>' +
+                                    '<td>' + response.currencycode + '</td>' +
+                                    '<td>' + response.exchangerate + '</td>' +
+                                    '<td>' + response.invoiceamount + '</td>' +
+                                    '<td>' + response.invoicelocalvalue + '</td>' +
+                                    '</tr>';
+                                $("#dataTable tbody").append(newRow);
+                            });
+
+                            $('#dataTable').DataTable({
+                                searching: true,
+                                ordering: true,
+                                order: [[3, 'asc']],
+                            });
+
+
+                           
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+                function itemcopy(invoiceId) {
+                    $.ajax({
+                        url: "/Mainpage/itemcopydata",
+                        type: 'GET',
+                        data: { invoiceid: invoiceId },
+                        success: function (responseArray) {
+                            $("#itemTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.itemcode + '</td>' +
+                                    '<td>' + response.itemdescription + '</td>' +
+                                    '<td>' + response.quantity + '</td>' +
+                                    '<td>' + response.itemamount + '</td>' +
+                                    '<td>' + response.itemlocalvalue + '</td>' +
+                                    '<td>' + response.unitprice + '</td>' +
+                                    '</tr>';
+                                $("#itemTable tbody").append(newRow);
+                            });
+
+                            $('#itemTable').DataTable({
+                                searching: true,
+                                ordering: true,
+                                order: [[3, 'asc']],
+                            });
+
+                           
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+
+                $("#additem").click(function () {
+                    $("#itemsectionform").show();
+                    $("#invoiceform").hide();
+                })
+
+                //$('#invoicenoitem').on('change', function () {
+                //    var selectedInvoiceNo = $(this).val();
+
+                //    fetchDataDropdown(selectedInvoiceNo);
+                //});
+
+                $(document).on('click', '#invoicenoitem', function () {
+                    fetchDataDropdown();
+                });
+
+                function fetchDataDropdown() {
+                    $.ajax({
+                        url: '/Invoice/getdropdown',
+                        type: 'GET',
+                        success: function (data) {
+                            console.log(data);
+                            var dropdown = $('#invoicenoitem');
+                            dropdown.empty();
+                            $.each(data, function (index, item) {
+                                dropdown.append($('<option>', {
+                                    label: item.invoiceno,
+                                    value: item.invoiceno
+
+
+                                }));
+                            });
+                            autocomplete();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error fetching data:', status, error);
+                        }
+                    });
+                }
+
+                function autocomplete() {
+
+
+
+                    $('#itemcode').autocomplete({
+                        source: function (request, response) {
+                            $.ajax({
+                                url: "/Invoice/iteminvoiceno",
+                                type: "GET",
+                                dataType: "json",
+                                data: { Prefix: request.term },
+                                success: function (data) {
+                                    response($.map(data, function (item) {
+                                        return { label: item.itemcode, value: item.itemcode, companyiditem: item.companyiditem };
+                                    }));
+
+                                }
+                            })
+
+                        },
+
+                        select: function (event, ui) {
+                            $(this).val(ui.item.label);
+
+                            var selectedcompanyiditem = ui.item.companyiditem;
+                            $.ajax({
+                                url: "/Invoice/getdbdata",
+                                type: "GET",
+                                dataType: "json",
+                                data: { companyiditem: selectedcompanyiditem, itemcode: ui.item.label },
+                                success: function (data) {
+                                    if (data.length > 0) {
+                                        var firstItem = data[0];
+
+                                        $('#itemdescription').val(firstItem.itemdescription);
+                                        $('#quantity').val(firstItem.quantity);
+                                       
+
+
+
+                                    }
+                                },
+                                error: function (error) {
+                                    console.error("Additional data AJAX error:", error);
+                                }
+                            });
+
+                            event.preventDefault();
+                        },
+                    });
+                }
+
+
+
+                $("#itemamount").on('change', function () {
+                    $("#itemlocalvalue").val('');
+                    $("#unitprice").val('');
+
+                    validateItemAmount($(this).val());
+                });
+
+
+
+                let totalAmount = 0;
+
+                function validateItemAmount(itemAmount) {
+                    const amount = parseFloat(itemAmount);
+
+                    if (amount <= invoicelocalvalue) {
+                        if (!isNaN(amount) && amount <= invoicelocalvalue) {
+                            const remainingAmount = invoicelocalvalue - totalAmount;
+
+                            if (amount <= remainingAmount) {
+                                $('#validationMessage').text('');
+                                totalAmount += amount;
+                                console.log(totalAmount);
+
+                                itemlocalamountcalculation();
+                               
+                            } else {
+                                alert(`Please enter a value less than or equal to ${remainingAmount}.`);
+                            }
+                        } else {
+                            alert('Please enter a valid numeric value less than or equal to invoicevalue');
+                        }
+                    } else {
+                        alert("Not valid amount");
+                    }
+
+                }
+
+
+
+
+
+
+                function itemlocalamountcalculation() {
+                    var invoiceno = $("#invoicenoitem").val();
+
+
+                    $.ajax({
+                        url: '/Invoice/invoiceno',
+                        type: 'GET',
+                        data: { invoiceno: invoiceno },
+                        success: function (response) {
+
+                            var itemamount = $("#itemamount").val();
+                            var item = itemamount / 10;
+                            var value = response;
+                            console.log(value);
+
+                            var itemvalue = value / 100;
+                            var localamount = itemvalue * item;
+                            $("#itemlocalvalue").val(localamount);
+
+                            quantityamount();
+
+                        },
+                        error: function (error) {
+                            console.error('Error deleting invoice data:', error);
+                        }
+                    });
+
+
+                }
+
+                function quantityamount() {
+                    console.log("sudharsan");
+                    var quantity = $("#quantity").val();
+                    var itemlocalvalue = $("#itemlocalvalue").val();
+                    var unitprice = itemlocalvalue / quantity;
+
+                    $("#unitprice").val(unitprice);
+
+                }
+
+                $("#itemsave").click(function (event) {
+                    event.preventDefault();
+                    if (formIsValid()) {
+                        saveitem();
+                       
+                    }
+                });
+
+                function formIsValid() {
+                    $(".error-message").remove();
+                    var itemlocalvalue = $("#itemlocalvalue").val();
+                    var unitprice = $("#unitprice").val();
+
+                    if (itemlocalvalue == "") {
+                        displayerror("itemlocalvalue", "please enter itemlocalvalue");
+                        return false;
+                    }
+                    if (unitprice == "") {
+                        displayerror("unitprice", "please enter unitprice");
+                        return false;
+                    }
+
+                    alert("Save successfully");
+                    return true;
+                }
+
+
+                function displayerror(id, message) {
+                    $("#" + id + "-error").remove();
+                    var errormessage = '<div class="error-message">' + message + '</div>';
+                    $("#" + id).after(errormessage);
+
+                }
+
+                function saveitem() {
+                    var dataform = $("#itemsectionform").serialize();
+
+                    $.ajax({
+                        url: "/Invoice/itemsave",
+                        type: "POST",
+                        data: dataform,
+                    })
+                        .done(function (response) {
+                            console.log("sudharsan");
+                            $("#carditem").show();
+                            $("#itemTable").show();
+                            
+                            fetchDataItem(response);
+                           
+                            $("#itemsectionform").hide();
+                        })
+                        .fail(function (error) {
+                            alert("Data item not saved");
+                        });
+                }
+
+                $("#itemTable").on('click', '.copy-btn', function () {
+                    var itemId = $(this).data('id');
+                    $.ajax({
+                        url: "/Mainpage/orderitemcopy",
+                        type: 'GET',
+                        data: { itemid: itemId },
+                        success: function (response) {
+
+                            alert(response);
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                    $.ajax({
+                        url: "/Mainpage/itemcopy",
+                        type: 'GET',
+                        data: { itemid: itemId },
+                        success: function (responseArray) {
+
+                            $("#itemTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.itemcode + '</td>' +
+                                    '<td>' + response.itemdescription + '</td>' +
+                                    '<td>' + response.quantity + '</td>' +
+                                    '<td>' + response.itemamount + '</td>' +
+                                    '<td>' + response.itemlocalvalue + '</td>' +
+                                    '<td>' + response.unitprice + '</td>' +
+
+                                    '</tr>';
+                                $("#itemTable").append(newRow);
+                                $('#itemTable').DataTable();
+                            });
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                })
+
+
+
+                function fetchDataItem(data) {
+
+                    $.ajax({
+                        url: '/Invoice/getdataitem',
+                        type: 'GET',
+                        data: data,
+                        success: function (responseArray) {
+
+                            $("#itemTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.itemcode + '</td>' +
+                                    '<td>' + response.itemdescription + '</td>' +
+                                    '<td>' + response.quantity + '</td>' +
+                                    '<td>' + response.itemamount + '</td>' +
+                                    '<td>' + response.itemlocalvalue + '</td>' +
+                                    '<td>' + response.unitprice + '</td>' +
+                                    
+                                    '</tr>';
+                                $("#itemTable").append(newRow);
+                                $('#itemTable').DataTable();
+                            });
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+
+                $("#itemTable").on('click', '.edit-btn', function () {
+                    var itemId = $(this).data('id');
+                    $("#itemsectionform").show();
+
+
+
+                    $.ajax({
+                        url: "/Invoice/updateitem",
+                        type: 'GET',
+                        data: { itemid: itemId },
+                        success: function (response) {
+
+                            editformitem(response);
+                            $("#itemTable tbody").empty();
+
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                });
+
+
+
+                function editformitem(data) {
+                    fetchDataDropdown();
+                    $("#invoicenoitem").val(data.invoiceno);
+
+                    $.each(data, function (property, value) {
+
+                        $('#itemsectionform [name="' + property + '"]').val(value);
+                    });
+
+                }
+
+                $("#itemTable").on('click', '.delete-btn', function () {
+
+                    var itemId = $(this).data('id');
+
+
+                    $.ajax({
+                        url: '/Invoice/deleteitem',
+                        type: 'GET',
+                        data: { itemid: itemId },
+                        success: function (response) {
+
+                            alert("Deleted successfully");
+                            fetchDataItemDelete(response);
+
+                        },
+                        error: function (error) {
+                            console.error('Error deleting item data:', error);
+                        }
+                    });
+                });
+
+                function fetchDataItemDelete(orderid) {
+
+                    var data = orderid;
+                    console.log(data);
+
+                    $.ajax({
+                        url: '/Invoice/getitemdelete',
+                        type: 'GET',
+                        data: { orderid: data },
+                        success: function (responseArray) {
+                            console.log(responseArray);
+                            $("#itemTable tbody").empty();
+                            responseArray.forEach(function (response) {
+                                var newRow = '<tr>' +
+                                    '<td><a class="edit-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                    '<a class="delete-btn" data-id="' + response.itemid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                    '<a class="copy-btn" data-id="' + response.itemid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                    '<td>' + response.invoiceno + '</td>' +
+                                    '<td>' + response.itemcode + '</td>' +
+                                    '<td>' + response.itemdescription + '</td>' +
+                                    '<td>' + response.quantity + '</td>' +
+                                    '<td>' + response.itemamount + '</td>' +
+                                    '<td>' + response.itemlocalvalue + '</td>' +
+                                    '<td>' + response.unitprice + '</td>' +
+                                   
+                                    '</tr>';
+                                $("#itemTable").append(newRow);
+                                $('#itemTable').DataTable();
+                            });
+                        },
+                        error: function (error) {
+                            console.error('Error fetching invoice data:', error);
+                        }
+                    });
+                }
+          }
+
+
+
+        });
+    </script>
+
+
+
+}

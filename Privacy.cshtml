@@ -1,0 +1,382 @@
+﻿@{
+    Layout = "_Dashboard";
+   
+}
+
+@section Styles{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"  />
+    
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 4px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .my-button-container {
+            text-align: right;
+        }
+
+       
+
+            
+
+       
+    </style>
+}
+<form id="orderform">
+    <br />
+    <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Order Entry List</h2>
+    <br />
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="fromdate">From Date</label>
+                    <input type="date" id="fromdate" name="fromdate" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" />
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="todate">To Date</label>
+                    <input type="date" id="todate" name="todate" class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" />
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="Job">Job Type:</label>
+                    <select name="job" id="job" class="form-control">
+                        <option value="Import">Import</option>
+                        <option value="Export">Export</option>
+                        <option value="Transit">Transit</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="orderno">Order No:</label>
+                    <input class="form-control" type="text" id="ordernomain" name="orderno">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="intiator">Intiator</label>
+                    <input class="form-control" type="text" id="initiatorm" name="initiator" autocomplete="on">
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="importer">Importer:</label>
+                    <input class="form-control" type="text" id="importerm" name="importer" autocomplete="on">
+                </div>
+                <div class="col-md-3 mb-1">
+                    <label class="form-label" for="exporter">Exporter:</label>
+                    <input class="form-control" type="text" id="exporterm" name="exporter" autocomplete="on">
+                </div>
+            </div>
+
+
+            <div class="my-button-container">
+                <a type="button" class="btn btn-primary" id="ordersearch">Search</a>
+                <a type="button" class="btn btn-success" asp-action="orderentry" asp-controller="Home">Add</a>
+            </div>
+           
+
+        </div>
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+           <h2 class="brand-text mb-0" style="text-align:center;font-weight:bold;">Order List Table</h2>
+            <table id="mainTable" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                            <th>Action</th>
+                            <th>OrderNo</th>
+                            <th>OrderDate</th>
+                            <th>JobType</th>
+                            <th>Initiator</th>
+                            <th>Importer</th>
+                            <th>Exporter</th>
+                            
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+          </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    
+    
+
+    <script>
+        $(document).ready(function () {
+
+           
+           
+
+            $("#mainTable").hide();
+            $("#orderentryform").hide();
+
+            
+            var today = new Date();
+            var startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+
+
+            var formattedStartDate = $.datepicker.formatDate('yy-mm-dd', startDate);
+            var formattedToday = $.datepicker.formatDate('yy-mm-dd', today);
+
+
+            $("#fromdate").val(formattedStartDate);
+            $("#todate").val(formattedToday);
+            
+
+            getdata(startDate, today);
+
+            $("#ordersearch").on('click',function(){
+                var job=$("#job").val();
+                var orderno=$("#ordernomain").val();
+                getdata(startDate,today,orderno,job);
+            });
+
+           
+
+            function getdata(startDate,today,orderno,job) {
+                $.ajax({
+                    url: '/Mainpage/getorder',
+                    type: 'POST',
+                    data: {
+                        date1: formattedStartDate,
+                        date2: formattedToday,
+                        orderno:orderno,
+                        jobtype:job,
+                    },
+                    success: function (data) {
+                         
+                        $("#mainTable tbody").empty();
+                        for (var i = 0; i < data.length; i++) {
+                            var newRow = '<tr>' +
+                                '<td><a href="/Home/orderentry/' + data[i].order.orderid + '"><i class="fa-solid fa-pen"></i></a>&nbsp;' +
+                                '<a class="delete-btn" data-id="' + data[i].order.orderid + '"><i class="fa-solid fa-trash"></i></a>&nbsp;' +
+                                '<a class="copy-btn" data-id="' + data[i].order.orderid + '"><i class="fa-regular fa-copy"></i></a></td>' +
+                                '<td>' + data[i].order.orderno + '</td>' +
+                                '<td>' + data[i].order.orderdate + '</td>' +
+                                '<td>' + data[i].order.jobtype + '</td>' +
+                                '<td>' + data[i].email[0] + '</td>' +
+                                '<td>' + data[i].email[1] + '</td>' +
+                                '<td>' + data[i].email[2] + '</td>' +
+                                
+                                '</tr>';
+                            $("#mainTable").show();
+                           
+                            $("#mainTable").append(newRow);
+
+                            $('#mainTable').DataTable({
+                                searching: true,
+                                ordering: true,
+                                order: [[3, 'asc']],
+                               
+                            });
+
+                           
+                        }
+                        
+                   },
+                    error: function (xhr, status, error) {
+                        console.error("Error:", error);
+                    }
+                });
+            }
+
+            $('#ordernomain').autocomplete({
+                minLength: 3,
+                source: function (request, response) {
+                  if (request.term.length >= 3) {
+                    $.ajax({
+                        url: "/Mainpage/getorderno",
+                        type: "GET",
+                        dataType: "json",
+                        data: { Prefix: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return { label: item.orderno, value: item.orderno };
+                            }));
+
+                        }
+                    })
+
+                       
+                  }
+                },
+
+                 select: function (event, ui) {
+                            $(this).val(ui.item.label);
+                            event.preventDefault();
+                 },
+
+            });
+
+             $('#initiatorm,#importerm,#exporterm').autocomplete({
+                minLength: 3,
+                source: function (request, response) {
+                    if (request.term.length >= 3){
+                        $.ajax({
+                            url: "/Mainpage/getvalue",
+                            type: "GET",
+                            dataType: "json",
+                            data: { Prefix: request.term },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return { label: item.email, value: item.email };
+                                }))
+
+                            }
+                        })
+                    }
+                   
+                },
+                
+                select: function (event, ui) {
+                    $(this).val(ui.item.label);
+                    event.preventDefault();
+                },
+                
+            });
+
+            //$("#mainTable").on('click', '.edit-btn', function () {
+            //        var orderId = $(this).data('id');
+
+            //    $("#orderform").hide();
+            //    $("#mainTable").hide();
+
+            //    $.ajax({
+            //        url: "/Mainpage/editorderdata",
+            //        type: 'GET',
+            //        data: { orderid: orderId },
+            //        success: function (response) {
+
+            //          editformorder(response);
+            //          $("#orderentryform").show();
+            //            $.ajax({
+            //                url: "/Mainpage/editdata",
+            //                type: 'GET',
+            //                data: { orderid: orderId },
+            //                success: function (response) {
+
+            //                    fetchDataAndAddRow(response);
+            //                    $("#dataTable").show();
+                               
+
+            //                    $.ajax({
+            //                        url: "/Mainpage/edititemdata",
+            //                        type: 'GET',
+            //                        data: { orderid: orderId },
+            //                        success: function (response) {
+
+            //                            fetchDataItem(response);
+            //                            $("#itemTable").show();
+
+            //                        },
+            //                        error: function (error) {
+            //                            console.error('Error fetching invoice data:', error);
+            //                        }
+            //                    });
+
+            //                },
+            //                error: function (error) {
+            //                    console.error('Error fetching invoice data:', error);
+            //                }
+            //            });
+
+
+            //        },
+            //        error: function (error) {
+            //            console.error('Error fetching invoice data:', error);
+            //        }
+            //    });
+
+                    
+            //});
+
+           
+            $("#mainTable").on('click','.delete-btn',function(){
+                var orderId = $(this).data('id');
+                alert("Want to delete data");
+                $.ajax({
+                    url: "/Mainpage/delete",
+                    type: 'GET',
+                    data: { orderid: orderId },
+                    success: function (response) {
+                        getdata(startDate, today);
+                        alert(response);
+                    },
+                    error: function (error) {
+                        console.error('Error fetching invoice data:', error);
+                    }
+                });
+            })
+
+              $("#mainTable").on('click','.copy-btn',function(){
+                  var orderId=$(this).data('id');
+                var companyId = '@TempData["id"]';
+
+                alert("Want to copy this data");
+
+
+                var selectedJobField = $("#job").val();
+                var checkUrl = '/Home/generateordernumber';
+
+                $.get(checkUrl, { companyId: companyId, selectedJobField: selectedJobField })
+                    .done(function (response) {
+                        var uniqueOrderNumber = response.orderNumber;
+                        //$("#orderno").val(uniqueOrderNumber);
+                        
+                        $.ajax({
+                            url: "/Mainpage/data",
+                            type: 'GET',
+                            data: { orderid: orderId,orderno:uniqueOrderNumber },
+                            success: function (response) {
+                                getdata(startDate, today);
+                                alert("Data copied");
+                            },
+                            error: function (error) {
+                                console.error('Error fetching invoice data:', error);
+                            }
+                        });
+                    })
+                    .fail(function () {
+                        alert('Error generating unique order number. Please try again.');
+                    });
+                
+              })
+
+
+           
+
+           
+
+        });
+    </script>
+
+
+  
+}
